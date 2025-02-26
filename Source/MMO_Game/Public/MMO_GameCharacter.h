@@ -22,6 +22,10 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
+	void TravelToMap(const FString& ServerAddress, const FString& OptionsParams);
+
+	UFUNCTION(Client, Reliable)
+	void TestClientRPC(const FString& ServerAddress, const FString& OptionsParams); 
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

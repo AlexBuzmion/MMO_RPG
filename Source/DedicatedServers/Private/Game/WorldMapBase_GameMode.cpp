@@ -1,8 +1,8 @@
 // Alex Buzmion II 2025
 
-
 #include "Game/WorldMapBase_GameMode.h"
 
+#include "GameLiftServerSDK.h"
 #include "GameLiftServerSDKModels.h"
 #include "DedicatedServers/DedicatedServers.h"
 #include "Game/DS_AWS_GI_Subsystem.h"
@@ -17,23 +17,31 @@ AWorldMapBase_GameMode::AWorldMapBase_GameMode()
 void AWorldMapBase_GameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-	UE_LOG(LogTemp, Warning, TEXT("ADS_LobbyGameMode::PostLogin for %s"), *NewPlayer->GetName()); 
+	UE_LOG(LogDedicatedServers, Warning, TEXT("ADS_LobbyGameMode::PostLogin for %s"), *NewPlayer->GetName()); 
+
+	if (!ExpectedMap.IsEmpty())
+	{
+		GetWorld()->ServerTravel(ExpectedMap + OptionsFromPreLogin, true);
+		ExpectedMap = TEXT("");
+	}
 }
 
 void AWorldMapBase_GameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	InitGameLift();
+	UE_LOG(LogDedicatedServers, Warning, TEXT("ADS_LobbyGameMode::BeginPlay map name loaded = %s"), *GetWorld()->GetMapName()); 
 }
 
 void AWorldMapBase_GameMode::InitSeamlessTravelPlayer(AController* NewController)
 {
 	Super::InitSeamlessTravelPlayer(NewController);
-	UE_LOG(LogTemp, Warning, TEXT("ADS_LobbyGameMode::InitSeamlessTravelPlayer for %s"), *NewController->GetName()); 
+	UE_LOG(LogDedicatedServers, Warning, TEXT("ADS_LobbyGameMode::InitSeamlessTravelPlayer for %s"), *NewController->GetName()); 
 }
 
 void AWorldMapBase_GameMode::Logout(AController* Exiting)
 {
+	UE_LOG(LogDedicatedServers, Warning, TEXT("ADS_LobbyGameMode::Logout Called")); 
 	Super::Logout(Exiting);
 	//NOTE: can be used to shutdown the server process if there are no players in the map or the last player is logging out
 	// CheckAndStopLobbyCountdownt(); // should be start the timer to shutdown 
@@ -47,7 +55,15 @@ void AWorldMapBase_GameMode::PreLogin(const FString& Options, const FString& Add
 	
 	const FString playerSessionId = UGameplayStatics::ParseOption(Options, TEXT("PlayerSessionId"));
 	const FString username = UGameplayStatics::ParseOption(Options, TEXT("Username"));
-
+	const FString mapName = UGameplayStatics::ParseOption(Options, TEXT("MapName"));
+	// if the mapname in the options passed is not the same as the map currently loaded 
+	if ( !mapName.IsEmpty() && !GetWorld()->GetMapName().Contains(mapName))
+	{
+		// cache the map name for later processing in Post Login to avoid any issues in accepting and connecting.
+		ExpectedMap = mapName;
+		OptionsFromPreLogin = Options; 
+	}
+	
 	TryAcceptPlayerSession(playerSessionId, username, ErrorMessage); // if this function returns anything other than an empty string for the ErrorMessage, the prelogin will fail
 	
 	UE_LOG(LogDedicatedServers, Warning, TEXT("ADS_LobbyGameMode::PreLogin for PlayerSessionId: %s, Username: %s"), *playerSessionId, *username); 

@@ -9,6 +9,11 @@
 
 UDSLocalPlayerSubSystem* UHTTPRequestManager::GetDSLocalPlayerSubSystem() const {
 	APlayerController* localPC = GEngine->GetFirstLocalPlayerController(GetWorld());
+	if (!IsValid(localPC)) {
+		UE_LOG(LogTemp, Warning, TEXT("GetDSLocalPlayerSubSystem: localPC is null"));
+		return nullptr;
+	}
+    
 	if (ULocalPlayer* localPlayer = Cast<ULocalPlayer>(localPC->Player))
 	{
 		if (IsValid(localPlayer)) {

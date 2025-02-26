@@ -30,7 +30,8 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UDS_AWS_GI_Subsystem> AWSSubsystem;
-
+	FString ExpectedMap;
+	FString OptionsFromPreLogin; 
 	void InitGameLift();
 	void SetServerParameters(FServerParameters& OutServerParameters);
 	void TryAcceptPlayerSession(const FString& PlayerSessionId, const FString& Username, FString& OutErrorMessage);

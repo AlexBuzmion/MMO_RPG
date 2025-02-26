@@ -83,8 +83,8 @@ void UCharacterSelectionOverlay::OnSelectButtonClicked()
 	if (selectedChar)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("loading data for%s"), *selectedChar->CharacterName);
-		GameSessionsManager->MapToJoin = selectedChar->LastMapLocation;
-		GameSessionsManager->JoinGameSession();
+		// GameSessionsManager->MapToJoin = selectedChar->LastMapLocation;
+		GameSessionsManager->TravelToMap(selectedChar->LastMapLocation, 0); // set to 0 to signify it is NOT a portal map request
 	} else
 	{
 		TextBlock_StatusMessage->SetText(FText::FromString("Please select a character. . ."));

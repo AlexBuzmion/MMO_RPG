@@ -10,7 +10,10 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameInstanceBase.h"
 #include "Engine/LocalPlayer.h"
+#include "Kismet/GameplayStatics.h"
+#include "UI/GameSessions/GameSessionsManager.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -26,6 +29,35 @@ void AMMO_GamePlayerController::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+}
+
+void AMMO_GamePlayerController::OnPortalInteract(const FString& TargetMap)
+{
+	// when player interacts with a portal, call server rpc to request travel
+	ServerRequestPortalTravel(TargetMap);
+}
+
+bool AMMO_GamePlayerController::ServerRequestPortalTravel_Validate(const FString& TargetMap)
+{
+	return true; 
+}
+
+void AMMO_GamePlayerController::ServerRequestPortalTravel_Implementation(const FString& TargetMap)
+{
+	// get the game sessions manager from our game instance subsystem
+	if (UGameInstanceBase* gameInstance = Cast<UGameInstanceBase>(GetWorld()->GetGameInstance()))
+	{
+		if (UGameSessionsManager* gsm = gameInstance->GetGameSessionsManager())
+		{
+			gsm->HandlePortalTravel(TargetMap, this);
+		}
+	}
+}
+
+void AMMO_GamePlayerController::ClientTravelToMap_Implementation(const FString& IpAndPort, const FString& Options)
+{
+	// client calls openlevel to travel using provided ip/port and options
+	UGameplayStatics::OpenLevel(this, FName(*IpAndPort), true, Options);
 }
 
 void AMMO_GamePlayerController::SetupInputComponent()

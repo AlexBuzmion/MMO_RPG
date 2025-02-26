@@ -32,7 +32,11 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	FString Username;
 	UPROPERTY(BlueprintReadOnly)
-	FString PlayerSessionId; 
+	FString PlayerSessionId;
+
+	UFUNCTION(Client, Reliable)
+	void TravelToIpAndPort(const FString& ServerAddress, const FString& OptionsParams);
+	
 protected:
 	
 	UFUNCTION(Server, Reliable)

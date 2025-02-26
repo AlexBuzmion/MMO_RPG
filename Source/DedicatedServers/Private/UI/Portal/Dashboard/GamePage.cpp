@@ -21,6 +21,6 @@ void UGamePage::JoinGameButtonClicked()
 {
 	check(JoinGameWidget->Button_JoinGame);
 	JoinGameWidget->Button_JoinGame->SetIsEnabled(false);
-	GameSessionsManager->MapToJoin = "GamePageMap";
+	// GameSessionsManager->MapToJoin = "GamePageMap";
 	GameSessionsManager->JoinGameSession();
 }

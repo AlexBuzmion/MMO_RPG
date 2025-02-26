@@ -1,12 +1,13 @@
 // Alex Buzmion II 2025
 
 
-#include "GameSessionsManager.h"
+#include "DedicatedServers/Public/UI/GameSessions/GameSessionsManager.h"
 
 #include "HttpModule.h"
 #include "JsonObjectConverter.h"
 #include "Data/API/APIData.h"
 #include "GameInstanceBase.h"
+#include "MMO_GamePlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "GameplayTags/DedicatedServersTags.h"
 #include "Interfaces/IHttpRequest.h"
@@ -15,62 +16,56 @@
 #include "Player/DSLocalPlayerSubSystem.h"
 #include "UI/HTTP/HTTPRequestTypes.h"
 
-void UGameSessionsManager::JoinGameSession()
+// function to initiate the request to find or create the game session with the map name through gamelifts API 
+void UGameSessionsManager::TravelToMap(const FString& MapName, int32 RequestType)
 {
 	JoinGameSessionDelegate.Broadcast(TEXT("Loading. . ."), false);
 
+	// set the flag for portal requests
+	bIsPortalRequest = (RequestType == 1);
+	
+	if (MapToJoin.IsEmpty())
+	{
+		MapToJoin = MapName;
+	}
 	check(APIData)
 	TSharedRef<IHttpRequest> request = FHttpModule::Get().CreateRequest();
-	request->OnProcessRequestComplete().BindUObject(this, &UGameSessionsManager::FindOrCreateGameSession_Response);
+	request->OnProcessRequestComplete().BindUObject(this, &UGameSessionsManager::JoinGameSession_Response);
 	const FString APIUrl = APIData->GetAPIEndpoint(DedicatedServersTags::GameSessionsAPI::FindOrCreateGameSession);
 	request->SetURL(APIUrl);
 	request->SetVerb(TEXT("POST"));
 	request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	FString mapName; // character selection screen  
+	 
 	if (UGameInstanceBase* giBase = Cast<UGameInstanceBase>(GetWorld()->GetGameInstance()))
 	{
-		mapName = giBase->CurrentMapName;
+		FString mapName = giBase->CurrentMapName;
 	}
+
 	TMap<FString, FString> contentParams = {
 		{TEXT("mapName"), MapToJoin},
-	};
+		};
+
 	const FString content = SerializeJsonObject(contentParams);
 	request->SetContentAsString(content);
 	request->ProcessRequest();
 }
 
-void UGameSessionsManager::TravelToMap(const FString& MapName)
+void UGameSessionsManager::HandlePortalTravel(const FString& MapName, AMMO_GamePlayerController* PlayerController)
 {
-	JoinGameSessionDelegate.Broadcast(TEXT("Loading. . ."), false);
-
-	check(APIData)
-	TSharedRef<IHttpRequest> request = FHttpModule::Get().CreateRequest();
-	request->OnProcessRequestComplete().BindUObject(this, &UGameSessionsManager::FindOrCreateGameSession_Response);
-	const FString APIUrl = APIData->GetAPIEndpoint(DedicatedServersTags::GameSessionsAPI::FindOrCreateGameSession);
-	request->SetURL(APIUrl);
-	request->SetVerb(TEXT("POST"));
-	request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	FString mapName; // character selection screen  
-	if (UGameInstanceBase* giBase = Cast<UGameInstanceBase>(GetWorld()->GetGameInstance()))
-	{
-		mapName = giBase->CurrentMapName;
-	}
-	TMap<FString, FString> contentParams = {
-		{TEXT("mapName"), MapName},
-	};
-	const FString content = SerializeJsonObject(contentParams);
-	request->SetContentAsString(content);
-	request->ProcessRequest();
+	bIsPortalRequest = true;
+	MapToJoin = MapName;
+	PortalRequestingPlayer = PlayerController;
+	TravelToMap(MapName, 1);
 }
 
-void UGameSessionsManager::FindOrCreateGameSession_Response(FHttpRequestPtr Request, FHttpResponsePtr Response,
-                                                            bool bWasSuccessful)
+// upon receiving the response from the FindOrCreate game session 
+void UGameSessionsManager::JoinGameSession_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	if (!bWasSuccessful)
 	{
-		JoinGameSessionDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);	
+		JoinGameSessionDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
+		return;
 	}
-
 	TSharedPtr<FJsonObject> jsonObject;
 	TSharedRef<TJsonReader<>> jsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
 	if (FJsonSerializer::Deserialize(jsonReader, jsonObject))
@@ -85,25 +80,10 @@ void UGameSessionsManager::FindOrCreateGameSession_Response(FHttpRequestPtr Requ
 		const FString gameSessionStatus = gameSession.Status;
 		const FString gameSessionId = gameSession.GameSessionId;
 		HandleGameSessionStatus(gameSessionStatus, gameSessionId);
-		
 	}	
 }
 
-FString UGameSessionsManager::GetUniquePlayerID() const
-{
-	// placeholder for player ID
-	APlayerController* localPC = GEngine->GetFirstLocalPlayerController(GetWorld());
-	if (IsValid(localPC))
-	{
-		APlayerState* localPS = localPC->GetPlayerState<APlayerState>();
-		if (IsValid(localPS) && localPS->GetUniqueId().IsValid())
-		{
-			return TEXT("Player_") + FString::FromInt(localPS->GetUniqueID());
-		}
-	}
-	return FString();
-}
-
+// if no errors were received from the response, we proceed in trying to create a player session ID 
 void UGameSessionsManager::HandleGameSessionStatus(const FString& Status, const FString& GameSessionID)
 {
 	if (Status.Equals(TEXT("ACTIVE")))
@@ -133,7 +113,32 @@ void UGameSessionsManager::HandleGameSessionStatus(const FString& Status, const 
 		JoinGameSessionDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
 	}	
 }
+// retry callback if the game session status is "ACTIVATING" 
+void UGameSessionsManager::JoinGameSession()
+{
+	JoinGameSessionDelegate.Broadcast(TEXT("Loading. . ."), false);
 
+	check(APIData)
+	TSharedRef<IHttpRequest> request = FHttpModule::Get().CreateRequest();
+	request->OnProcessRequestComplete().BindUObject(this, &UGameSessionsManager::JoinGameSession_Response);
+	const FString APIUrl = APIData->GetAPIEndpoint(DedicatedServersTags::GameSessionsAPI::FindOrCreateGameSession);
+	request->SetURL(APIUrl);
+	request->SetVerb(TEXT("POST"));
+	request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	FString mapName; // character selection screen  
+	if (UGameInstanceBase* giBase = Cast<UGameInstanceBase>(GetWorld()->GetGameInstance()))
+	{
+		mapName = giBase->CurrentMapName;
+	}
+	TMap<FString, FString> contentParams = {
+		{TEXT("mapName"), MapToJoin},
+	};
+	const FString content = SerializeJsonObject(contentParams);
+	request->SetContentAsString(content);
+	request->ProcessRequest();
+}
+
+// function to initiate the request to create the player session ID through gamelifts API 
 void UGameSessionsManager::TryCreatePlayerSession(const FString& PlayerId, const FString& GameSessionID)
 {
 	check(APIData)
@@ -155,12 +160,14 @@ void UGameSessionsManager::TryCreatePlayerSession(const FString& PlayerId, const
 	request->ProcessRequest();	
 }
 
+// upon receiving the response to create player session id, and validates it does not have any errors, check if it is a map portal request or 
 void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request, FHttpResponsePtr Response,
 	bool bWasSuccessful)
 {
 	if (!bWasSuccessful)
 	{
-		JoinGameSessionDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);	
+		JoinGameSessionDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
+		return; 
 	}
 	
 	TSharedPtr<FJsonObject> jsonObject;
@@ -170,16 +177,29 @@ void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request,
 		if (ContainsErrors(jsonObject))
 		{
 			JoinGameSessionDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
+			return; 
 		}
 		FDS_PlayerSession playerSession;
 		FJsonObjectConverter::JsonObjectToUStruct(jsonObject.ToSharedRef(), &playerSession);
 
-		const FString optionsParam = "?PlayerSessionId=" + playerSession.PlayerSessionId + "?Username=" + playerSession.PlayerId;
+		const FString optionsParam = "?PlayerSessionId=" + playerSession.PlayerSessionId + "?Username=" + playerSession.PlayerId + "?MapName=" + MapToJoin;
 		
 		const FString IpAndPort = playerSession.IpAddress + TEXT(":") + FString::FromInt(playerSession.Port);
 		const FName Address (*IpAndPort);
-		UGameplayStatics::OpenLevel(this, Address, true, optionsParam);
 
+		if (bIsPortalRequest)
+		{
+			// For map portal requests, broadcast the connection details
+			// OnPortalSessionReadyDelegate.Broadcast(IpAndPort, optionsParam);
+			PortalRequestingPlayer->ClientTravelToMap(IpAndPort, optionsParam);
+		}
+		else
+		{
+			// For initial join flow, immediately open the level.
+			UGameplayStatics::OpenLevel(this, Address, true, optionsParam);
+		}
+	}
+}
 		// APlayerController* localPC = GEngine->GetFirstLocalPlayerController(GetWorld());
 		// if (IsValid(localPC))
 		// {
@@ -188,5 +208,18 @@ void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request,
 		// 	localPC->SetInputMode(inputModeData);
 		// 	localPC->SetShowMouseCursor(true);
 		// }
-	}
-}
+
+// FString UGameSessionsManager::GetUniquePlayerID() const
+// {
+// 	// placeholder for player ID
+// 	APlayerController* localPC = GEngine->GetFirstLocalPlayerController(GetWorld());
+// 	if (IsValid(localPC))
+// 	{
+// 		APlayerState* localPS = localPC->GetPlayerState<APlayerState>();
+// 		if (IsValid(localPS) && localPS->GetUniqueId().IsValid())
+// 		{
+// 			return TEXT("Player_") + FString::FromInt(localPS->GetUniqueID());
+// 		}
+// 	}
+// 	return FString();
+// }

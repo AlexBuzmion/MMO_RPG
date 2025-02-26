@@ -30,6 +30,12 @@ void ADS_PlayerController::ReceivedPlayer()
 	}
 }
 
+void ADS_PlayerController::TravelToIpAndPort_Implementation(const FString& ServerAddress, const FString& OptionsParams)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Client: Received TestClientRPC on %s"), *OptionsParams);
+	ClientTravel(ServerAddress, ETravelType::TRAVEL_Absolute, false);
+}
+
 void ADS_PlayerController::Server_Ping_Implementation(float TimeOfRequest)
 {
 	Client_Pong(TimeOfRequest);

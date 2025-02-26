@@ -6,11 +6,13 @@
 #include "Blueprint/UserWidget.h"
 #include "CharacterSelectionOverlay.generated.h"
 
+class UWidgetSwitcher;
 class UTextBlock;
 class UCharacterCreationPage;
 class UCharacterListPage;
 class UCharacterSelectionManager;
 class UGameSessionsManager;
+class UButton;
 
 UCLASS()
 class DEDICATEDSERVERS_API UCharacterSelectionOverlay : public UUserWidget

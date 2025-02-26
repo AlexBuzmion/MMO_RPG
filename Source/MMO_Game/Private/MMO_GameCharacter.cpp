@@ -5,11 +5,13 @@
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "DedicatedServers/DedicatedServers.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 AMMO_GameCharacter::AMMO_GameCharacter()
 {
@@ -48,4 +50,15 @@ AMMO_GameCharacter::AMMO_GameCharacter()
 void AMMO_GameCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+}
+
+void AMMO_GameCharacter::TravelToMap(const FString& ServerAddress, const FString& OptionsParams)
+{
+	UGameplayStatics::OpenLevel(this, FName(*ServerAddress), true, OptionsParams);
+}
+
+void AMMO_GameCharacter::TestClientRPC_Implementation(const FString& ServerAddress, const FString& OptionsParams)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Client: Received TestClientRPC on %s"), *OptionsParams);
+	UGameplayStatics::OpenLevel(this, FName(*ServerAddress), true, OptionsParams);
 }

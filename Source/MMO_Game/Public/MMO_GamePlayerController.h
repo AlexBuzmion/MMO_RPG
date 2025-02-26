@@ -16,7 +16,7 @@ class UInputAction;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS()
-class AMMO_GamePlayerController : public ADS_PlayerController
+class MMO_GAME_API AMMO_GamePlayerController : public ADS_PlayerController
 {
 	GENERATED_BODY()
 
@@ -43,6 +43,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* SetDestinationTouchAction;
 
+	// called when player interacts with a portal
+	void OnPortalInteract(const FString& TargetMap);
+
+	// server rpc to request portal travel from this client
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRequestPortalTravel(const FString& TargetMap);
+	bool ServerRequestPortalTravel_Validate(const FString& TargetMap);
+	void ServerRequestPortalTravel_Implementation(const FString& TargetMap);
+
+	// client rpc to trigger level travel on the requesting client only
+	UFUNCTION(Client, Reliable)
+	void ClientTravelToMap(const FString& IpAndPort, const FString& Options);
+	
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
