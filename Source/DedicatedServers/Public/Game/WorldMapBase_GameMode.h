@@ -16,7 +16,8 @@ class DEDICATEDSERVERS_API AWorldMapBase_GameMode : public ADS_GameMode_Base
 public:
 	AWorldMapBase_GameMode();
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override; 
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitSeamlessTravelPlayer(AController* NewController) override;

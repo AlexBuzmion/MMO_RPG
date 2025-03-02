@@ -19,6 +19,7 @@ class DEDICATEDSERVERS_API UHTTPRequestManager : public UObject
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
 	UDSLocalPlayerSubSystem* GetDSLocalPlayerSubSystem() const;
 	
 protected:

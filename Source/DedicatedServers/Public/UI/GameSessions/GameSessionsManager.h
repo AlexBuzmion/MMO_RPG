@@ -35,7 +35,6 @@ private:
 	void HandleGameSessionStatus(const FString& Status, const FString& GameSessionID);
 	void TryCreatePlayerSession(const FString& PlayerId, const FString& GameSessionID);
 	void CreatePlayerSession_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	// FString GetUniquePlayerID() const;
 	
 	// store the requesting player for portal travel
 	TWeakObjectPtr<AMMO_GamePlayerController> PortalRequestingPlayer;

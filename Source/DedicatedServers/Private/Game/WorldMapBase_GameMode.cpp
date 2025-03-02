@@ -2,12 +2,17 @@
 
 #include "Game/WorldMapBase_GameMode.h"
 
+#include "EngineUtils.h"
+#include "GameInstanceBase.h"
 #include "GameLiftServerSDK.h"
 #include "GameLiftServerSDKModels.h"
 #include "DedicatedServers/DedicatedServers.h"
+#include "Engine/PlayerStartPIE.h"
 #include "Game/DS_AWS_GI_Subsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/DSLocalPlayerSubSystem.h"
 #include "Player/DS_PlayerController.h"
+#include "UI/GameSessions/GameSessionsManager.h"
 
 AWorldMapBase_GameMode::AWorldMapBase_GameMode()
 {
@@ -21,10 +26,88 @@ void AWorldMapBase_GameMode::PostLogin(APlayerController* NewPlayer)
 
 	if (!ExpectedMap.IsEmpty())
 	{
-		GetWorld()->ServerTravel(ExpectedMap + OptionsFromPreLogin, true);
+		GetWorld()->ServerTravel(ExpectedMap + OptionsFromPreLogin, false);
 		ExpectedMap = TEXT("");
 	}
 }
+
+AActor* AWorldMapBase_GameMode::ChoosePlayerStart_Implementation(AController* Player)
+{
+	UE_LOG(LogDedicatedServers, Warning, TEXT("Choosing player start"));
+	return Super::ChoosePlayerStart_Implementation(Player);
+	// APlayerStart* FoundPlayerStart = nullptr;
+	// UClass* PawnClass = GetDefaultPawnClassForController(Player);
+	// APawn* PawnToFit = PawnClass ? PawnClass->GetDefaultObject<APawn>() : nullptr;
+	// TArray<APlayerStart*> UnOccupiedStartPoints;
+	// TArray<APlayerStart*> OccupiedStartPoints;
+	// UWorld* World = GetWorld();
+	//
+	// //? additional local variables for the specific the games specific use case
+	// FString PreviousMap; // to store the previous map the player came from
+	// UDSLocalPlayerSubSystem* localPSS = nullptr; // cache the local player subsystem
+	// FString loadedMap = World->GetMapName(); // cache the mapname currently loaded
+	//
+	// // store the previous maps name, to spawn the player to the playerstart that has a tag of the MapName it came from
+	// if (UGameInstanceBase* GI = Cast<UGameInstanceBase>(World->GetGameInstance())) 
+	// {
+	// 	localPSS = GI->GetGameSessionsManager()->GetDSLocalPlayerSubSystem();
+	// 	if (localPSS)
+	// 	{
+	// 		PreviousMap = localPSS->CurrentMap;
+	// 	} else
+	// 	{
+	// 		UE_LOG(LogDedicatedServers, Warning, TEXT("Local PSS is null"));
+	// 	}
+	// }
+	//
+	// for (TActorIterator<APlayerStart> It(World); It; ++It)
+	// {
+	// 	APlayerStart* PlayerStart = *It;
+	// 	// check if the player start's tag matches the previous map
+	// 	if (PlayerStart->PlayerStartTag == PreviousMap)
+	// 	{
+	// 		FoundPlayerStart = PlayerStart;
+	// 		break; 
+	// 	}
+	// 	// if no tag match, collect potential player starts
+	// 	FVector ActorLocation = PlayerStart->GetActorLocation();
+	// 	const FRotator ActorRotation = PlayerStart->GetActorRotation();
+	// 	if (!World->EncroachingBlockingGeometry(PawnToFit, ActorLocation, ActorRotation))
+	// 	{
+	// 		UnOccupiedStartPoints.Add(PlayerStart);
+	// 	}
+	// 	else if (World->FindTeleportSpot(PawnToFit, ActorLocation, ActorRotation))
+	// 	{
+	// 		OccupiedStartPoints.Add(PlayerStart);
+	// 	}
+	// }
+	// // fallback if no matching tag was found
+	// if (FoundPlayerStart == nullptr)
+	// {
+	// 	if (UnOccupiedStartPoints.Num() > 0)
+	// 	{
+	// 		FoundPlayerStart = UnOccupiedStartPoints[FMath::RandRange(0, UnOccupiedStartPoints.Num() - 1)];
+	// 	}
+	// 	else if (OccupiedStartPoints.Num() > 0)
+	// 	{
+	// 		FoundPlayerStart = OccupiedStartPoints[FMath::RandRange(0, OccupiedStartPoints.Num() - 1)];
+	// 	}
+	// }
+	// // update the local subsystem with the current map for future transitions
+	// if (IsValid(localPSS))
+	// {
+	// 	localPSS->CurrentMap = loadedMap;
+	// }
+	// UE_LOG(LogDedicatedServers, Warning, TEXT("Player start chosen with Tag: %s"), *FoundPlayerStart->PlayerStartTag.ToString());
+	//
+	// return FoundPlayerStart;
+}
+
+AActor* AWorldMapBase_GameMode::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
+{
+	return Super::FindPlayerStart_Implementation(Player, IncomingName);
+}
+
 
 void AWorldMapBase_GameMode::BeginPlay()
 {

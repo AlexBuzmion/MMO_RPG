@@ -9,6 +9,7 @@
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Player/DSLocalPlayerSubSystem.h"
 #include "UI/CharacterSelection/CharacterCreationPage.h"
 #include "UI/CharacterSelection/CharacterDataObject.h"
 #include "UI/CharacterSelection/CharacterListPage.h"
@@ -84,6 +85,18 @@ void UCharacterSelectionOverlay::OnSelectButtonClicked()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("loading data for%s"), *selectedChar->CharacterName);
 		// GameSessionsManager->MapToJoin = selectedChar->LastMapLocation;
+		if (UDSLocalPlayerSubSystem* localPss = GameSessionsManager->GetDSLocalPlayerSubSystem())
+		{
+			// update the current map from the 
+			if (localPss->CurrentMap.IsEmpty())
+			{
+				localPss->CurrentMap = selectedChar->LastMapLocation; 
+			} else // for redundancy, clear it anyways, and assign the new value in case its somehow cached --for now 
+			{
+				localPss->CurrentMap = "";
+				localPss->CurrentMap = selectedChar->LastMapLocation;
+			}
+		}
 		GameSessionsManager->TravelToMap(selectedChar->LastMapLocation, 0); // set to 0 to signify it is NOT a portal map request
 	} else
 	{

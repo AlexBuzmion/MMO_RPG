@@ -19,9 +19,12 @@ public:
 	void SetRefreshTokenTimer();
 	void UpdateTokens(const FString& AccessToken, const FString& IdToken);
 	FString GetAccessToken() const;
-
+	
 	FString Username;
-	FString Email; 
+	FString Email;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	FString CurrentMap;
+	
 private:
 	UPROPERTY()
 	FDS_AuthenticationResult AuthenticationResult;

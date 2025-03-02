@@ -42,8 +42,8 @@ void UGameSessionsManager::TravelToMap(const FString& MapName, int32 RequestType
 	}
 
 	TMap<FString, FString> contentParams = {
-		{TEXT("mapName"), MapToJoin},
-		};
+	{TEXT("mapName"), MapToJoin},
+	};
 
 	const FString content = SerializeJsonObject(contentParams);
 	request->SetContentAsString(content);
@@ -76,7 +76,6 @@ void UGameSessionsManager::JoinGameSession_Response(FHttpRequestPtr Request, FHt
 		}
 		FDS_GameSession gameSession;
 		FJsonObjectConverter::JsonObjectToUStruct(jsonObject.ToSharedRef(), &gameSession);
-
 		const FString gameSessionStatus = gameSession.Status;
 		const FString gameSessionId = gameSession.GameSessionId;
 		HandleGameSessionStatus(gameSessionStatus, gameSessionId);
@@ -200,26 +199,4 @@ void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request,
 		}
 	}
 }
-		// APlayerController* localPC = GEngine->GetFirstLocalPlayerController(GetWorld());
-		// if (IsValid(localPC))
-		// {
-		// 	FInputModeGameAndUI inputModeData;
-		// 	inputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
-		// 	localPC->SetInputMode(inputModeData);
-		// 	localPC->SetShowMouseCursor(true);
-		// }
 
-// FString UGameSessionsManager::GetUniquePlayerID() const
-// {
-// 	// placeholder for player ID
-// 	APlayerController* localPC = GEngine->GetFirstLocalPlayerController(GetWorld());
-// 	if (IsValid(localPC))
-// 	{
-// 		APlayerState* localPS = localPC->GetPlayerState<APlayerState>();
-// 		if (IsValid(localPS) && localPS->GetUniqueId().IsValid())
-// 		{
-// 			return TEXT("Player_") + FString::FromInt(localPS->GetUniqueID());
-// 		}
-// 	}
-// 	return FString();
-// }
