@@ -133,7 +133,7 @@ void UCharacterSelectionManager::SaveCreatedCharacter(const FString& Name)
 			{TEXT("characterName"), Name},
 			{TEXT("isAlive"), "1"},
 			{TEXT("level"), "1"},
-			{TEXT("lastMapLocation"), "TutorialMap"},
+			{TEXT("lastMapLocation"), "Map2"},
 		};
 		const FString content = SerializeJsonObject(contentParams);
 		request->SetContentAsString(content); // end of constructing the body content
