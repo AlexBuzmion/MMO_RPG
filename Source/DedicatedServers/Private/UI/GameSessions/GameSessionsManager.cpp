@@ -7,12 +7,12 @@
 #include "JsonObjectConverter.h"
 #include "Data/API/APIData.h"
 #include "GameInstanceBase.h"
-#include "MMO_GamePlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "GameplayTags/DedicatedServersTags.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/CherubPlayerController.h"
 #include "Player/DSLocalPlayerSubSystem.h"
 #include "UI/HTTP/HTTPRequestTypes.h"
 
@@ -50,8 +50,9 @@ void UGameSessionsManager::TravelToMap(const FString& MapName, int32 RequestType
 	request->ProcessRequest();
 }
 
-void UGameSessionsManager::HandlePortalTravel(const FString& MapName, AMMO_GamePlayerController* PlayerController)
+void UGameSessionsManager::HandlePortalTravel(const FString& MapName, ACherubPlayerController* PlayerController)
 {
+	check(IsValid(PlayerController));
 	bIsPortalRequest = true;
 	MapToJoin = MapName;
 	PortalRequestingPlayer = PlayerController;

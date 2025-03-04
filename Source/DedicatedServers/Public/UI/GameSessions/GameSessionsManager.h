@@ -7,7 +7,7 @@
 #include "UI/HTTP/HTTPRequestManager.h"
 #include "GameSessionsManager.generated.h"
 
-class AMMO_GamePlayerController;
+class ACherubPlayerController;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPortalSessionReady, const FString&, IpAndPort, const FString&, OptionsParam);
 
 UCLASS()
@@ -29,7 +29,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable)
-	void HandlePortalTravel(const FString& MapName, AMMO_GamePlayerController* PlayerController);
+	void HandlePortalTravel(const FString& MapName, ACherubPlayerController* PlayerController);
 private:
 	void JoinGameSession_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void HandleGameSessionStatus(const FString& Status, const FString& GameSessionID);
@@ -37,7 +37,7 @@ private:
 	void CreatePlayerSession_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	
 	// store the requesting player for portal travel
-	TWeakObjectPtr<AMMO_GamePlayerController> PortalRequestingPlayer;
+	TWeakObjectPtr<ACherubPlayerController> PortalRequestingPlayer;
 	
 	// Flag indicating whether this request was initiated by a map portal.
 	bool bIsPortalRequest = false;

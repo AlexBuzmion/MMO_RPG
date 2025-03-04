@@ -13,7 +13,7 @@ class MMO_GAME_API AMMO_GameCharacter : public ACharacter
 
 public:
 	AMMO_GameCharacter();
-
+	
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 

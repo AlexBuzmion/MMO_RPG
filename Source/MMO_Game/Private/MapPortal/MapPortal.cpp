@@ -3,9 +3,9 @@
 #include "MapPortal/MapPortal.h"
 
 #include "GameInstanceBase.h"
-#include "MMO_GamePlayerController.h"
 #include "Components/BoxComponent.h"
 #include "DedicatedServers/Public/UI/GameSessions/GameSessionsManager.h"
+#include "Player/CherubPlayerController.h"
 
 
 // Sets default values
@@ -41,7 +41,7 @@ void AMapPortal::OnPlayerEnterPortal(UPrimitiveComponent* OverlappedComp, AActor
 			if (APlayerController* PC = Cast<APlayerController>(OverlappedPawn->GetController()))
 			{
 				// try casting to our custom controller type
-				AMMO_GamePlayerController* MyPC = Cast<AMMO_GamePlayerController>(PC);
+				ACherubPlayerController* MyPC = Cast<ACherubPlayerController>(PC);
 				if (MyPC)
 				{
 					// retrieve game sessions manager from the game instance or a dedicated subsystem
