@@ -32,7 +32,6 @@ void ACherubPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 
 void ACherubPlayerController::BeginPlay()
 {
-	// Call the base class  
 	Super::BeginPlay();
 }
 
