@@ -9,7 +9,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine"
+				"Engine", 
+				"GameplayAbilities"
 			]
 		},
 		{
@@ -32,6 +33,10 @@
 		},
 		{
 			"Name": "WebBrowserWidget",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
 			"Enabled": true
 		}
 	]

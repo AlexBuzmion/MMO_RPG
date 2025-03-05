@@ -8,6 +8,17 @@ public class MMO_Game : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "NavigationSystem", "AIModule", "Niagara", "EnhancedInput", "DedicatedServers" });
+        PublicDependencyModuleNames.AddRange(new string[] { 
+			"Core", 
+	        "CoreUObject", 
+			"Engine", 
+			"InputCore", 
+			"NavigationSystem", 
+			"AIModule", 
+			"Niagara", 
+			"EnhancedInput", 
+			"GameplayAbilities", "GameplayTags", "GameplayTasks",
+			"DedicatedServers",  
+		});
     }
 }

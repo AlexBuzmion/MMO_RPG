@@ -4,25 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "CherubCharacterBase.h"
+#include "Interface/HighlightInterface.h"
 #include "Cherub_MonsterCharacter.generated.h"
 
 UCLASS()
-class MMO_GAME_API ACherub_MonsterCharacter : public ACherubCharacterBase
+class MMO_GAME_API ACherub_MonsterCharacter : public ACherubCharacterBase, public IHighlightInterface
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
 	ACherub_MonsterCharacter();
-
+	UFUNCTION()
+	void BeginCursorOverlap(UPrimitiveComponent* TouchedComponent);
+	UFUNCTION()
+	void EndCursorOverlap(UPrimitiveComponent* TouchedComponent);
+	virtual void HighlightActor() override;
+	virtual void UnHighlightActor() override;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };

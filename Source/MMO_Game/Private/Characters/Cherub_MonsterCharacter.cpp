@@ -3,30 +3,44 @@
 
 #include "Characters/Cherub_MonsterCharacter.h"
 
+#include "MMO_Game/MMO_Game.h"
+
 
 // Sets default values
 ACherub_MonsterCharacter::ACherub_MonsterCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-}
-
-// Called when the game starts or when spawned
-void ACherub_MonsterCharacter::BeginPlay()
-{
-	Super::BeginPlay();
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	
 }
 
-// Called every frame
-void ACherub_MonsterCharacter::Tick(float DeltaTime)
+void ACherub_MonsterCharacter::BeginCursorOverlap(UPrimitiveComponent* TouchedComponent)
 {
-	Super::Tick(DeltaTime);
+	HighlightActor();
 }
 
-// Called to bind functionality to input
-void ACherub_MonsterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ACherub_MonsterCharacter::HighlightActor()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	GetMesh()->SetRenderCustomDepth(true);
+	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED); 
 }
+
+void ACherub_MonsterCharacter::EndCursorOverlap(UPrimitiveComponent* TouchedComponent)
+{
+	UnHighlightActor();
+}
+
+void ACherub_MonsterCharacter::UnHighlightActor()
+{
+	GetMesh()->SetRenderCustomDepth(false);
+}
+
+void ACherub_MonsterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	GetMesh()->OnBeginCursorOver.AddDynamic(this, &ACherub_MonsterCharacter::BeginCursorOverlap);
+	GetMesh()->OnEndCursorOver.AddDynamic(this, &ACherub_MonsterCharacter::EndCursorOverlap);
+}
+
 
