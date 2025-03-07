@@ -3,10 +3,14 @@
 
 #include "Characters/Cherub_PlayerCharacter.h"
 
+#include "AbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Player/CherubPlayerController.h"
+#include "Player/Cherub_PlayerState.h"
+#include "UI/HUD/Cherub_InGameHUD.h"
 
 
 // Sets default values
@@ -50,18 +54,50 @@ ACherub_PlayerCharacter::ACherub_PlayerCharacter()
 void ACherub_PlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
-// Called every frame
+void ACherub_PlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	// this initializes the ability actor info for the server
+	InitializeAbilityActorInfo();
+}
+
+void ACherub_PlayerCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	// this initializes the ability actor info for the client
+	InitializeAbilityActorInfo();
+}
+
 void ACherub_PlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-// Called to bind functionality to input
 void ACherub_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void ACherub_PlayerCharacter::InitializeAbilityActorInfo()
+{
+	ACherub_PlayerState* cPS = GetPlayerState<ACherub_PlayerState>();
+	if (cPS)
+	{
+		cPS->GetAbilitySystemComponent()->InitAbilityActorInfo(cPS, this);
+		AbilitySystemComponent = cPS->GetAbilitySystemComponent();
+		AttributeSet = cPS->GetAttributeSet();
+		// non-assert check to continue only if this runs on the local player controller
+		if (ACherubPlayerController* cPC = Cast<ACherubPlayerController>(GetController()))
+		{	// get and cast HUD to our custom HUD 
+			if (ACherub_InGameHUD* cHUD = Cast<ACherub_InGameHUD>(cPC->GetHUD()))
+			{	// initialize the overlay
+				cHUD->InitOverlay(cPC, cPS, AbilitySystemComponent, AttributeSet);
+			}
+		}
+		
+	}
+
+}

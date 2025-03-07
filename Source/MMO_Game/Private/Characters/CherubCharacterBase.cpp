@@ -8,9 +8,13 @@ ACherubCharacterBase::ACherubCharacterBase()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
+UAbilitySystemComponent* ACherubCharacterBase::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
 void ACherubCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 

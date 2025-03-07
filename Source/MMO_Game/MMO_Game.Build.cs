@@ -19,6 +19,8 @@ public class MMO_Game : ModuleRules
 			"EnhancedInput", 
 			"GameplayAbilities", "GameplayTags", "GameplayTasks",
 			"DedicatedServers",  
+			"UMG",
+			
 		});
     }
 }

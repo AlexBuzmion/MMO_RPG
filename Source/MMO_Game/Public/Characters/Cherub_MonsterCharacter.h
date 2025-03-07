@@ -15,10 +15,12 @@ class MMO_GAME_API ACherub_MonsterCharacter : public ACherubCharacterBase, publi
 public:
 	// Sets default values for this character's properties
 	ACherub_MonsterCharacter();
+	
 	UFUNCTION()
 	void BeginCursorOverlap(UPrimitiveComponent* TouchedComponent);
 	UFUNCTION()
 	void EndCursorOverlap(UPrimitiveComponent* TouchedComponent);
+	// Highlighter Interface Functions
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 	
@@ -26,4 +28,5 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	
 };

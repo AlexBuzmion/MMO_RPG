@@ -3,6 +3,8 @@
 
 #include "Characters/Cherub_MonsterCharacter.h"
 
+#include "AbilitySystem/Cherub_AbilitySysComponentBase.h"
+#include "AbilitySystem/Cherub_AttributeSet.h"
 #include "MMO_Game/MMO_Game.h"
 
 
@@ -12,7 +14,11 @@ ACherub_MonsterCharacter::ACherub_MonsterCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	AbilitySystemComponent = CreateDefaultSubobject<UCherub_AbilitySysComponentBase>("Ability System Component");
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 	
+	AttributeSet = CreateDefaultSubobject<UCherub_AttributeSet>("AttributeSet");
 }
 
 void ACherub_MonsterCharacter::BeginCursorOverlap(UPrimitiveComponent* TouchedComponent)
@@ -39,8 +45,10 @@ void ACherub_MonsterCharacter::UnHighlightActor()
 void ACherub_MonsterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	check(GetMesh());
 	GetMesh()->OnBeginCursorOver.AddDynamic(this, &ACherub_MonsterCharacter::BeginCursorOverlap);
 	GetMesh()->OnEndCursorOver.AddDynamic(this, &ACherub_MonsterCharacter::EndCursorOverlap);
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
 
