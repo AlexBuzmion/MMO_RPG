@@ -61,29 +61,53 @@ private:
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 
 public:
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Cherub_AttributeSet")
+	//! Basic Attributes
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Basic AttributeSet")
 	FGameplayAttributeData Health;
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
 	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Health);
 	
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Cherub_AttributeSet")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Basic AttributeSet")
 	FGameplayAttributeData MaxHealth;
 	UFUNCTION()
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const;
 	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, MaxHealth);
 	
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "Cherub_AttributeSet")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "Basic AttributeSet")
 	FGameplayAttributeData Mana;
 	UFUNCTION()
 	void OnRep_Mana(const FGameplayAttributeData& OldMana) const;
 	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Mana);
 	
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMana, Category = "Cherub_AttributeSet")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMana, Category = "Basic AttributeSet")
 	FGameplayAttributeData MaxMana;
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
 	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, MaxMana);
 
-
+	//! Primary Attributes
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Attack, Category = "Primary AttributeSet")
+	FGameplayAttributeData Attack;
+	UFUNCTION()
+	void OnRep_Attack(const FGameplayAttributeData& OldAttack) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Attack);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MagicAttack, Category = "Primary AttributeSet")
+	FGameplayAttributeData MagicAttack;
+	UFUNCTION()
+	void OnRep_MagicAttack(const FGameplayAttributeData& OldMagicAttack) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, MagicAttack);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Defense, Category = "Primary AttributeSet")
+	FGameplayAttributeData Defense;
+	UFUNCTION()
+	void OnRep_Defense(const FGameplayAttributeData& OldDefense) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Defense);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Agility, Category = "Primary AttributeSet")
+	FGameplayAttributeData Agility;
+	UFUNCTION()
+	void OnRep_Agility(const FGameplayAttributeData& OldAgility) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Agility);
 };

@@ -21,7 +21,7 @@ public:
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="AbilitySystem")
+	UPROPERTY(VisibleAnywhere, Category="AbilitySystem")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category="AbilitySystem")

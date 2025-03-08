@@ -48,7 +48,13 @@ void ACherub_MonsterCharacter::BeginPlay()
 	check(GetMesh());
 	GetMesh()->OnBeginCursorOver.AddDynamic(this, &ACherub_MonsterCharacter::BeginCursorOverlap);
 	GetMesh()->OnEndCursorOver.AddDynamic(this, &ACherub_MonsterCharacter::EndCursorOverlap);
+	
+}
+
+void ACherub_MonsterCharacter::InitAbilityActorInfo()
+{
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	Cast<UCherub_AbilitySysComponentBase>(AbilitySystemComponent)->AbilityActorInfoSet();
 }
 
 

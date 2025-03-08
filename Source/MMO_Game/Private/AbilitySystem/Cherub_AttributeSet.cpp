@@ -22,6 +22,12 @@ void UCherub_AttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Mana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
+	
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Attack, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, MagicAttack, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Defense, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Agility, COND_None, REPNOTIFY_Always);
+	
 }
 
 void UCherub_AttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -47,7 +53,14 @@ void UCherub_AttributeSet::PostGameplayEffectExecute(const struct FGameplayEffec
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 
-	
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	{
+		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
+	}
+	if (Data.EvaluatedData.Attribute == GetManaAttribute())
+	{
+		SetMana(FMath::Clamp(GetMana(), 0.0f, GetMaxMana()));
+	}
 }
 
 void UCherub_AttributeSet::SetEffectProperties(const struct FGameplayEffectModCallbackData& Data,
@@ -94,13 +107,30 @@ void UCherub_AttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxH
 
 void UCherub_AttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Health, OldMana);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Mana, OldMana);
 }
 
 void UCherub_AttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Health, OldMaxMana);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, MaxMana, OldMaxMana);
 }
 
+void UCherub_AttributeSet::OnRep_Attack(const FGameplayAttributeData& OldAttack) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Attack, OldAttack);
+}
 
+void UCherub_AttributeSet::OnRep_MagicAttack(const FGameplayAttributeData& OldMagicAttack) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, MagicAttack, OldMagicAttack);
+}
 
+void UCherub_AttributeSet::OnRep_Defense(const FGameplayAttributeData& OldDefense) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Defense, OldDefense);
+}
+
+void UCherub_AttributeSet::OnRep_Agility(const FGameplayAttributeData& OldAgility) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Agility, OldAgility);
+}

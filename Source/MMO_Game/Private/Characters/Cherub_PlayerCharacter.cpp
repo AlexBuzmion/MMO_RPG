@@ -4,6 +4,7 @@
 #include "Characters/Cherub_PlayerCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/Cherub_AbilitySysComponentBase.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -61,14 +62,14 @@ void ACherub_PlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	// this initializes the ability actor info for the server
-	InitializeAbilityActorInfo();
+	InitAbilityActorInfo();
 }
 
 void ACherub_PlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	// this initializes the ability actor info for the client
-	InitializeAbilityActorInfo();
+	InitAbilityActorInfo();
 }
 
 void ACherub_PlayerCharacter::Tick(float DeltaTime)
@@ -81,12 +82,13 @@ void ACherub_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ACherub_PlayerCharacter::InitializeAbilityActorInfo()
+void ACherub_PlayerCharacter::InitAbilityActorInfo()
 {
 	ACherub_PlayerState* cPS = GetPlayerState<ACherub_PlayerState>();
 	if (cPS)
 	{
 		cPS->GetAbilitySystemComponent()->InitAbilityActorInfo(cPS, this);
+		Cast<UCherub_AbilitySysComponentBase>(cPS->GetAbilitySystemComponent())->AbilityActorInfoSet();
 		AbilitySystemComponent = cPS->GetAbilitySystemComponent();
 		AttributeSet = cPS->GetAttributeSet();
 		// non-assert check to continue only if this runs on the local player controller
@@ -97,7 +99,7 @@ void ACherub_PlayerCharacter::InitializeAbilityActorInfo()
 				cHUD->InitOverlay(cPC, cPS, AbilitySystemComponent, AttributeSet);
 			}
 		}
-		
+		InitializePrimaryAttributes();
 	}
 
 }

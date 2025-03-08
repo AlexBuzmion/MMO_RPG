@@ -18,7 +18,7 @@ struct FWidgetControllerParams
 
 	FWidgetControllerParams() {};
 	FWidgetControllerParams(APlayerController* PC, APlayerState* APS, UAbilitySystemComponent* ASC, UAttributeSet* AttS)
-	: PlayerController(PC), AttributeSet(AttS), AbilitySystemComponent(ASC), PlayerState(APS) {};
+	: PlayerController(PC), PlayerState(APS), AbilitySystemComponent(ASC), AttributeSet(AttS) {};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<APlayerController> PlayerController = nullptr;
