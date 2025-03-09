@@ -23,10 +23,16 @@ public:
 	// Highlighter Interface Functions
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
-	
+
+	// Combat Interface Function/s
+	virtual int32 GetActorLevel() override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void InitAbilityActorInfo() override;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Class Defaults")
+	int32 Level = 1;
+
 };

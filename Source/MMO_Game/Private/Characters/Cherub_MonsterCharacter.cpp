@@ -42,6 +42,11 @@ void ACherub_MonsterCharacter::UnHighlightActor()
 	GetMesh()->SetRenderCustomDepth(false);
 }
 
+int32 ACherub_MonsterCharacter::GetActorLevel()
+{
+	return Level; 
+}
+
 void ACherub_MonsterCharacter::BeginPlay()
 {
 	Super::BeginPlay();

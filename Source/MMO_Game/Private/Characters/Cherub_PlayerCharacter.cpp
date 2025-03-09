@@ -72,6 +72,14 @@ void ACherub_PlayerCharacter::OnRep_PlayerState()
 	InitAbilityActorInfo();
 }
 
+int32 ACherub_PlayerCharacter::GetActorLevel()
+{
+	const ACherub_PlayerState* cPS = GetPlayerState<ACherub_PlayerState>();
+	check(cPS);
+	
+	return cPS->GetActorLevel();
+}
+
 void ACherub_PlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -99,7 +107,7 @@ void ACherub_PlayerCharacter::InitAbilityActorInfo()
 				cHUD->InitOverlay(cPC, cPS, AbilitySystemComponent, AttributeSet);
 			}
 		}
-		InitializePrimaryAttributes();
+		InitializeDefaultAttributes();
 	}
 
 }
