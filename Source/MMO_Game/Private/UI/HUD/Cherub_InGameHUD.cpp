@@ -4,6 +4,7 @@
 #include "UI/HUD/Cherub_InGameHUD.h"
 
 #include "UI/Widget/Cherub_UserWidget.h"
+#include "UI/WidgetController/AttributeMenuWidgetController.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 
 UOverlayWidgetController* ACherub_InGameHUD::GetOverlayWidgetController(const FWidgetControllerParams& WCParams)
@@ -18,8 +19,20 @@ UOverlayWidgetController* ACherub_InGameHUD::GetOverlayWidgetController(const FW
 	return OverlayWidgetController;
 }
 
+UAttributeMenuWidgetController* ACherub_InGameHUD::GetAttributeMenuWidgetController(
+	const FWidgetControllerParams& WCParams)
+{
+	if (AttributeMenuWidgetController == nullptr)
+	{
+		AttributeMenuWidgetController = NewObject<UAttributeMenuWidgetController>(this, AttributeMenuWidgetControllerClass);
+		AttributeMenuWidgetController->SetWidgetControllerParams(WCParams);
+		AttributeMenuWidgetController->BindCallbacksToDependencies();
+	}
+	return AttributeMenuWidgetController;
+}
+
 void ACherub_InGameHUD::InitOverlay(APlayerController* PC, APlayerState* APS, UAbilitySystemComponent* ASC,
-	UAttributeSet* AttS)
+                                    UAttributeSet* AttS)
 {
 	//perform a check and handle unassigned Classes
 	checkf(OverlayWidgetClass, TEXT("Overlay Widget class unitialized, fill BP_CherubInGameHUD"))

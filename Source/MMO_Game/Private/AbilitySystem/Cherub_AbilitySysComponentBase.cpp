@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/Cherub_AbilitySysComponentBase.h"
 
+#include "CherubGameplayTags.h"
 #include "Characters/CherubCharacterBase.h"
 
 

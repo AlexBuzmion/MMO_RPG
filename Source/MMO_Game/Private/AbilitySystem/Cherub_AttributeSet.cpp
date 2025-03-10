@@ -6,27 +6,57 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "CherubGameplayTags.h"
 
 UCherub_AttributeSet::UCherub_AttributeSet()
 {
-	InitHealth(70.0f);
-	InitMaxHealth(100.0f);
-	InitMana(37.0f);
-	InitMaxMana(60.0f);
+	const FCherubGameplayTags& gameplayTags = FCherubGameplayTags::Get();
+	// Primary Attributes
+	TagsToAttributes.Add(gameplayTags.Attribute_Primary_Attack, GetAttackAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Primary_MagicAttack, GetMagicAttackAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Primary_Defense, GetDefenseAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Primary_Dexterity, GetDexterityAttribute);
+
+	// Secondary Attributes
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_Agility, GetAgilityAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_Accuracy, GetAccuracyAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_HealthRegeneration, GetHealthRegenAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_ManaRegeneration, GetManaRegenAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_CriticalRate, GetCriticalChanceAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_SpellCriticalRate, GetSpellCriticalChanceAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_CriticalDamage, GetCriticalDamageAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_CriticalResistance, GetCriticalResistanceAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_BlockChance, GetBlockChanceAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_MaxHealth, GetMaxHealthAttribute);
+	TagsToAttributes.Add(gameplayTags.Attribute_Secondary_MaxMana, GetMaxManaAttribute);
+	
 }
 
 void UCherub_AttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	// Basic Attributes
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Health, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Mana, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
 	
+	// Primary Attributes 
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Attack, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, MagicAttack, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Defense, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Dexterity, COND_None, REPNOTIFY_Always);
+	
+	// Secondary Attributes
 	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Agility, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, Accuracy, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, HealthRegen, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, ManaRegen, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, CriticalChance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, SpellCriticalChance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, CriticalDamage, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, CriticalResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, BlockChance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCherub_AttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
 	
 }
 
@@ -94,27 +124,17 @@ void UCherub_AttributeSet::SetEffectProperties(const struct FGameplayEffectModCa
 	}
 }
 
-
+// Basic Attributes Rep Notify Functions 
 void UCherub_AttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Health, OldHealth);
-}
-
-void UCherub_AttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, MaxHealth, OldMaxHealth);
 }
 
 void UCherub_AttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Mana, OldMana);
 }
-
-void UCherub_AttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, MaxMana, OldMaxMana);
-}
-
+// Primary Attributes Rep Notify Functions 
 void UCherub_AttributeSet::OnRep_Attack(const FGameplayAttributeData& OldAttack) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Attack, OldAttack);
@@ -130,7 +150,62 @@ void UCherub_AttributeSet::OnRep_Defense(const FGameplayAttributeData& OldDefens
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Defense, OldDefense);
 }
 
+void UCherub_AttributeSet::OnRep_Dexterity(const FGameplayAttributeData& OldDexterity) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Dexterity, OldDexterity);
+}
+// Secondary Attributes Rep Notify Functions 
 void UCherub_AttributeSet::OnRep_Agility(const FGameplayAttributeData& OldAgility) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Agility, OldAgility);
+}
+
+void UCherub_AttributeSet::OnRep_CriticalChance(const FGameplayAttributeData& OldCriticalChance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, CriticalChance, OldCriticalChance);
+}
+
+void UCherub_AttributeSet::OnRep_SpellCriticalChance(const FGameplayAttributeData& OldSpellCriticalChance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, SpellCriticalChance, OldSpellCriticalChance);
+}
+
+void UCherub_AttributeSet::OnRep_CriticalDamage(const FGameplayAttributeData& OldCriticalDamage) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, CriticalDamage, OldCriticalDamage);
+}
+
+void UCherub_AttributeSet::OnRep_CriticalResistance(const FGameplayAttributeData& OldCriticalResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, CriticalResistance, OldCriticalResistance);
+}
+
+void UCherub_AttributeSet::OnRep_BlockChance(const FGameplayAttributeData& OldBlockChance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, BlockChance, OldBlockChance);
+}
+
+void UCherub_AttributeSet::OnRep_Accuracy(const FGameplayAttributeData& OldAccuracy) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, Accuracy, OldAccuracy);
+}
+
+void UCherub_AttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, MaxHealth, OldMaxHealth);
+}
+
+void UCherub_AttributeSet::OnRep_HealthRegen(const FGameplayAttributeData& OldHealthRegen) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, HealthRegen, OldHealthRegen);
+}
+
+void UCherub_AttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, MaxMana, OldMaxMana);
+}
+
+void UCherub_AttributeSet::OnRep_ManaRegen(const FGameplayAttributeData& OldManaRegen) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCherub_AttributeSet, ManaRegen, OldManaRegen);
 }

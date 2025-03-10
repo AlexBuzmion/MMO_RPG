@@ -9,13 +9,13 @@
 
 UMMC_MaxHealth::UMMC_MaxHealth()
 {
-	// define the attribute we want to capture
-	AttributeDefinition.AttributeToCapture = UCherub_AttributeSet::GetDefenseAttribute();
-	AttributeDefinition.AttributeSource = EGameplayEffectAttributeCaptureSource::Target;
+	// define the attribute we want to capture in this case Defense 
+	DefenseDefinition.AttributeToCapture = UCherub_AttributeSet::GetDefenseAttribute();
+	DefenseDefinition.AttributeSource = EGameplayEffectAttributeCaptureSource::Target;
 	// capturing the attribute right away if true, as soon as the effect spec is created
-	AttributeDefinition.bSnapshot = false;
+	DefenseDefinition.bSnapshot = false;
 	// add to the array of attributes to capture
-	RelevantAttributesToCapture.Add(AttributeDefinition);
+	RelevantAttributesToCapture.Add(DefenseDefinition);
 }
 
 float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const
@@ -29,7 +29,7 @@ float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation(const FGameplayEffec
 	evaluationParams.TargetTags = targetTags;
 	// create the container to store the attribute magnitude
 	float attribute = 0.0f;
-	GetCapturedAttributeMagnitude(AttributeDefinition, Spec, evaluationParams,attribute);
+	GetCapturedAttributeMagnitude(DefenseDefinition, Spec, evaluationParams,attribute);
 	// clamp the attribute
 	attribute = FMath::Max<float>(attribute, 0.0f);
 
@@ -37,5 +37,6 @@ float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation(const FGameplayEffec
 	const int32 playerLevel = combatInterface->GetActorLevel();
 	
 	// return the actual value after the custom calculation we desire
-	return 80.0f + 2.5f * attribute + 10.0f * playerLevel;
+	// return 50.0f + 2.5f * attribute + 10.0f * playerLevel;
+	return 50.0f + ( attribute * 5 ); 
 }

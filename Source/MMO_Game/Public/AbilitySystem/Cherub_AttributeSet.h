@@ -42,6 +42,11 @@ struct FEffectProperties
 	
 };
 
+// typedef is specific to the FGameplayAttribute() signature, but TStaticFuncPtr is generic to any signature chosen/set
+// typedef TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr FAttributeFuncPtr;
+template<class T>
+using TStaticFuncPtr = TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr;
+
 /* //! steps to add a stat:
  * declare FGameplayAttributeData stat with a UPROPERTY(ReplicatedUsing = OnRep_Stat)
  * create the function to be called on ReplicatedUsing
@@ -57,6 +62,10 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
+
+	//! FGameplayAttribute(*)() == TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr
+	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()> > TagsToAttributes;
+
 private:
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 
@@ -105,9 +114,66 @@ public:
 	void OnRep_Defense(const FGameplayAttributeData& OldDefense) const;
 	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Defense);
 	
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Agility, Category = "Primary AttributeSet")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Dexterity, Category = "Primary AttributeSet")
+	FGameplayAttributeData Dexterity;
+	UFUNCTION()
+	void OnRep_Dexterity(const FGameplayAttributeData& OldDexterity) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Dexterity);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Agility, Category = "Secondary AttributeSet")
 	FGameplayAttributeData Agility;
 	UFUNCTION()
 	void OnRep_Agility(const FGameplayAttributeData& OldAgility) const;
 	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Agility);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Accuracy, Category = "Secondary AttributeSet")
+	FGameplayAttributeData Accuracy;
+	UFUNCTION()
+	void OnRep_Accuracy(const FGameplayAttributeData& OldAccuracy) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, Accuracy);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_HealthRegen, Category = "Secondary AttributeSet")
+	FGameplayAttributeData HealthRegen;
+	UFUNCTION()
+	void OnRep_HealthRegen(const FGameplayAttributeData& OldHealthRegen) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, HealthRegen);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ManaRegen, Category = "Secondary AttributeSet")
+	FGameplayAttributeData ManaRegen;
+	UFUNCTION()
+	void OnRep_ManaRegen(const FGameplayAttributeData& OldManaRegen) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, ManaRegen);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalChance, Category = "Secondary AttributeSet")
+	FGameplayAttributeData CriticalChance;
+	UFUNCTION()
+	void OnRep_CriticalChance(const FGameplayAttributeData& OldCriticalChance) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, CriticalChance);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_SpellCriticalChance, Category = "Secondary AttributeSet")
+	FGameplayAttributeData SpellCriticalChance;
+	UFUNCTION()
+	void OnRep_SpellCriticalChance(const FGameplayAttributeData& OldSpellCriticalChance) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, SpellCriticalChance);
+		
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalDamage, Category = "Secondary AttributeSet")
+	FGameplayAttributeData CriticalDamage;
+	UFUNCTION()
+	void OnRep_CriticalDamage(const FGameplayAttributeData& OldCriticalDamage) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, CriticalDamage);
+		
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalResistance, Category = "Secondary AttributeSet")
+	FGameplayAttributeData CriticalResistance;
+	UFUNCTION()
+	void OnRep_CriticalResistance(const FGameplayAttributeData& OldCriticalResistance) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, CriticalResistance);
+		
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_BlockChance, Category = "Secondary AttributeSet")
+	FGameplayAttributeData BlockChance;
+	UFUNCTION()
+	void OnRep_BlockChance(const FGameplayAttributeData& OldBlockChance) const;
+	ATTRIBUTE_ACCESSORS(UCherub_AttributeSet, BlockChance);
 };
+
+ 
+
