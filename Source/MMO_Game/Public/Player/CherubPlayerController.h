@@ -4,12 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GameplayTagContainer.h"
 #include "CherubPlayerController.generated.h"
 
+class UCherubInputConfig;
 /** Forward declaration to improve compiling times */
 class UNiagaraSystem;
 class UInputMappingContext;
 class UInputAction;
+class UCherub_AbilitySysComponentBase;
+class USplineComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogCherubCharacter, Log, All);
 
@@ -23,8 +27,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	/** Time Threshold to know if it was a short press */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	float ShortPressThreshold;
+	
 
 	/** FX Class that we will spawn when clicking */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -61,9 +64,10 @@ protected:
 
 	virtual void SetupInputComponent() override;
 	
-	// To add mapping context
 	virtual void BeginPlay() override;
-
+	void AutoRun();
+	virtual void Tick(float DeltaSeconds) override;
+	
 	/** Input handlers for SetDestination action. */
 	void OnInputStarted();
 	void OnSetDestinationTriggered();
@@ -71,25 +75,29 @@ protected:
 	void OnTouchTriggered();
 	void OnTouchReleased();
 
-	UFUNCTION()
-	void PerformStopMovement();
-	UFUNCTION(Server, Reliable)
-	void ServerStopMovement();
-	
-	UFUNCTION()
-	void HandleOnSetDestinationReleased(AController* Controller, const FVector& Destination);
-	
-	UFUNCTION(Server, Reliable)
-	void ServerSetCachedDestination(const FVector& NewDestination);
-	
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerSetDestination(AController* Controller, const FVector& Destination);
-	bool ServerSetDestination_Validate(AController* Controller, const FVector& Destination); 
-
-	UPROPERTY(BlueprintReadOnly, Replicated)
-	FVector CachedDestination;
 private:
+	FVector CachedDestination;
+	float FollowTime = 0.f; // For how long it has been pressed
+	float ShortPressThreshold;
+	bool bAutoRunning;
+	bool bTargetting;
+	UPROPERTY(EditDefaultsOnly)
+	float AutoRunAcceptanceRadius;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USplineComponent> Spline;  
 
+	FHitResult CursorHit;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UCherubInputConfig> InputConfig; 
 	bool bIsTouch; // Is it a touch device
-	float FollowTime; // For how long it has been pressed
+
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
+	void AbilityInputTagHeld(FGameplayTag InputTag);
+
+	UPROPERTY()
+	TObjectPtr<UCherub_AbilitySysComponentBase> CherubAbilitySystemComponent;
+	UCherub_AbilitySysComponentBase* GetCASC(); 
 };
+

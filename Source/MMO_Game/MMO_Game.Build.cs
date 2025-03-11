@@ -17,10 +17,17 @@ public class MMO_Game : ModuleRules
 			"AIModule", 
 			"Niagara", 
 			"EnhancedInput", 
-			"GameplayAbilities", "GameplayTags", "GameplayTasks",
+			"GameplayAbilities", 
 			"DedicatedServers",  
 			"UMG",
 			
 		});
+        
+        PrivateDependencyModuleNames.AddRange( new string[]
+        {
+	        "GameplayTags", 
+	        "GameplayTasks",
+	        "NavigationSystem",
+        });
     }
 }

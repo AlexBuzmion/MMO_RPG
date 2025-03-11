@@ -8,7 +8,8 @@
 #include "Interface/CombatInterface.h"
 #include "CherubCharacterBase.generated.h"
 
-class UGameplayEffect;
+class UGameplayEffect; 
+class UGameplayAbility;
 class UAbilitySystemComponent;
 class UAttributeSet; 
 
@@ -44,6 +45,8 @@ protected:
 	
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Effect, float Level) const;
 	void InitializeDefaultAttributes() const;
-
-	
+	void AddCharacterAbilities() const; 
+private: 
+	UPROPERTY(EditAnywhere, Category="Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities; 
 };

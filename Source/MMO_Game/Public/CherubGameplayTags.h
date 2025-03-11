@@ -29,8 +29,13 @@ public:
 	FGameplayTag Attribute_Secondary_CriticalDamage;
 	FGameplayTag Attribute_Secondary_CriticalResistance;
 	FGameplayTag Attribute_Secondary_BlockChance;
-protected:
 
+	FGameplayTag InputTag_LeftMouse;
+	FGameplayTag InputTag_RightMouse;
+	FGameplayTag InputTag_1; 
+	FGameplayTag InputTag_2; 
+	FGameplayTag InputTag_3; 
+	FGameplayTag InputTag_4; 
 private:
 	static FCherubGameplayTags GameplayTags; 
 };

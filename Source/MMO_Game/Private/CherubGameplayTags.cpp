@@ -70,5 +70,31 @@ void FCherubGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Secondary.Agility"),
 		FString("raises movement/attack speed and dodge rate")
 	);
+
+	//! Input Tags
+	GameplayTags.InputTag_LeftMouse = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.LeftMouse"),
+		FString("")
+	);
+	GameplayTags.InputTag_RightMouse = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.RightMouse"),
+		FString("")
+	);
+	GameplayTags.InputTag_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.1"),
+		FString("")
+	);
+	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.2"),
+		FString("")
+		);
+	GameplayTags.InputTag_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.3"),
+		FString("")
+		);
+	GameplayTags.InputTag_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.4"),
+		FString("")
+	);
 	
 }

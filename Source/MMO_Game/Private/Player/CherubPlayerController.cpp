@@ -3,11 +3,18 @@
 
 #include "Player/CherubPlayerController.h"
 
-#include "EnhancedInputComponent.h"
+// #include "EnhancedInputComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "CherubGameplayTags.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameInstanceBase.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "AbilitySystem/Cherub_AbilitySysComponentBase.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Components/SplineComponent.h"
+#include "Input/CherubInputComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/GameSessions/GameSessionsManager.h"
@@ -17,22 +24,49 @@ DEFINE_LOG_CATEGORY(LogCherubCharacter);
 ACherubPlayerController::ACherubPlayerController()
 {
 	bShowMouseCursor = true;
+	bReplicates = true;
 	DefaultMouseCursor = EMouseCursor::Default;
 	CachedDestination = FVector::ZeroVector;
 	FollowTime = 0.f;
-	bReplicates = true;
+	ShortPressThreshold = 0.4f;
+	bAutoRunning = false;
+	bTargetting = false;
+	AutoRunAcceptanceRadius = 50.0f;
+	Spline = CreateDefaultSubobject<USplineComponent>("Spline"); 
 }
 
 	
 void ACherubPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME_CONDITION_NOTIFY(ACherubPlayerController, CachedDestination, COND_None, REPNOTIFY_Always); 
 }
 
 void ACherubPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ACherubPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	AutoRun();
+}
+
+void ACherubPlayerController::AutoRun()
+{
+	if (!bAutoRunning) return; 
+	if (APawn* controlledPawn = GetPawn())
+	{
+		const FVector locationOnSpline = Spline->FindLocationClosestToWorldLocation(controlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		const FVector direction = Spline->FindDirectionClosestToWorldLocation(locationOnSpline, ESplineCoordinateSpace::World);
+		controlledPawn->AddMovementInput(direction);
+		const float distanceToDestination = (locationOnSpline - CachedDestination).Length();
+		if (distanceToDestination < AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+		}
+	}
 }
 
 void ACherubPlayerController::OnPortalInteract(const FString& TargetMap)
@@ -76,48 +110,137 @@ void ACherubPlayerController::SetupInputComponent()
 	}
 
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	if (UCherubInputComponent* CherubInputComp = Cast<UCherubInputComponent>(InputComponent))
 	{
 		// Setup mouse input events
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &ACherubPlayerController::OnInputStarted);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &ACherubPlayerController::OnSetDestinationTriggered);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &ACherubPlayerController::OnSetDestinationReleased);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &ACherubPlayerController::OnSetDestinationReleased);
+		// CherubInputComp->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &ACherubPlayerController::OnInputStarted);
+		// CherubInputComp->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &ACherubPlayerController::OnSetDestinationTriggered);
+		// CherubInputComp->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &ACherubPlayerController::OnSetDestinationReleased);
+		// CherubInputComp->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &ACherubPlayerController::OnSetDestinationReleased);
+		//
+		// // Setup touch input events
+		// CherubInputComp->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &ACherubPlayerController::OnInputStarted);
+		// CherubInputComp->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &ACherubPlayerController::OnTouchTriggered);
+		// CherubInputComp->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &ACherubPlayerController::OnTouchReleased);
+		// CherubInputComp->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &ACherubPlayerController::OnTouchReleased);
 
-		// Setup touch input events
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &ACherubPlayerController::OnInputStarted);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &ACherubPlayerController::OnTouchTriggered);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &ACherubPlayerController::OnTouchReleased);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &ACherubPlayerController::OnTouchReleased);
+		CherubInputComp->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 	}
 	else
 	{
 		UE_LOG(LogCherubCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+	
 }
 
-void ACherubPlayerController::OnInputStarted()
+void ACherubPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	// StopMovement();
-	if (HasAuthority())
+	if (InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMouse))
 	{
-		PerformStopMovement();
-	} else
-	{
-		ServerStopMovement();
+		// bTargetting = ThisActor ? true : false;
+		bAutoRunning = false;
 	}
 }
 
-void ACherubPlayerController::PerformStopMovement()
+void ACherubPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Called server stop"));
-	StopMovement();
+	// check if we should activate ability
+	if (!InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMouse))
+	{
+		if (GetCASC())
+		{
+			GetCASC()->AbilityInputTagReleased(InputTag);
+		}
+		return; 
+	}
+	if (bTargetting)
+	{
+		if (GetCASC())
+		{
+			GetCASC()->AbilityInputTagReleased(InputTag);
+		}
+	}
+	else // click to move behavior 
+	{
+		const APawn* controlledPawn = GetPawn();
+		if (FollowTime <= ShortPressThreshold && controlledPawn)
+		{
+			// create the navigation path
+			if (UNavigationPath* navPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, controlledPawn->GetActorLocation(), CachedDestination))
+			{
+				Spline->ClearSplinePoints();
+				for (const FVector& pointLoc : navPath->PathPoints)
+				{
+					Spline->AddSplinePoint(pointLoc, ESplineCoordinateSpace::World);
+					DrawDebugSphere(GetWorld(), pointLoc, 8.f, 8, FColor::Yellow, false, 5.f);
+				}
+				if (navPath->PathPoints.Num() > 0)
+				{
+					CachedDestination = navPath->PathPoints[navPath->PathPoints.Num() - 1];
+				}
+				bAutoRunning = true;
+			}
+		}
+		FollowTime = 0.f;
+		bTargetting = false;
+	}
 }
 
-void ACherubPlayerController::ServerStopMovement_Implementation()
+void ACherubPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	UE_LOG(LogTemp, Log, TEXT("Requesting server to stop movement"));
-	PerformStopMovement();
+	// check if we should activate ability
+	if (!InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMouse))
+	{
+		if (GetCASC())
+		{
+			GetCASC()->AbilityInputTagHeld(InputTag);
+		}
+		return; 
+	}
+	if (bTargetting)
+	{
+		if (GetCASC())
+		{
+			GetCASC()->AbilityInputTagHeld(InputTag);
+		}
+	}
+	else // click to move behavior 
+	{
+		FollowTime += GetWorld()->GetDeltaSeconds();
+		
+		if (GetHitResultUnderCursor(ECC_Visibility, false, CursorHit))
+		{
+			CachedDestination = CursorHit.Location; // or impact point since its a line 
+		}
+		if (APawn* controlledPawn = GetPawn())
+		{
+			const FVector worldDirection = (CachedDestination - controlledPawn->GetActorLocation()).GetSafeNormal();
+			controlledPawn->AddMovementInput(worldDirection);
+		}
+	}
+}
+
+UCherub_AbilitySysComponentBase* ACherubPlayerController::GetCASC()
+{
+	if (CherubAbilitySystemComponent == nullptr)
+	{
+		 UAbilitySystemComponent* asc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>());
+		CherubAbilitySystemComponent = Cast<UCherub_AbilitySysComponentBase>(asc);
+	}
+	return CherubAbilitySystemComponent;
+}
+
+
+
+
+
+
+/* 
+ * template movement implementation
+ */
+void ACherubPlayerController::OnInputStarted()
+{
+	StopMovement();
 }
 
 // Triggered every frame when the input is held down
@@ -141,8 +264,7 @@ void ACherubPlayerController::OnSetDestinationTriggered()
 	// If we hit a surface, cache the location
 	if (bHitSuccessful)
 	{
-		// CachedDestination = Hit.Location;
-		ServerSetCachedDestination(Hit.Location);
+		CachedDestination = Hit.Location;
 	}
 	
 	// Move towards mouse pointer or touch
@@ -161,41 +283,11 @@ void ACherubPlayerController::OnSetDestinationReleased()
 	{
 		// We move there and spawn some particles
 		// this should be a server RPC 
-		// UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
-		HandleOnSetDestinationReleased(this, CachedDestination);
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
 	}
 
 	FollowTime = 0.f;
-}
-
-void ACherubPlayerController::HandleOnSetDestinationReleased(AController* Controller, const FVector& Destination)
-{
-	if (HasAuthority())
-	{
-		UE_LOG(LogTemp, Log, TEXT("Server moving %s to Location: %s"), *Controller->GetName(), *Destination.ToString());
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(Controller, Destination);
-	} else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Client requesting to move %s to Location: %s"), *Controller->GetName(), *Destination.ToString());
-		ServerSetDestination(Controller, Destination);
-	}
-}
-
-void ACherubPlayerController::ServerSetDestination_Implementation(AController* Controller, const FVector& Destination)
-{
-	UE_LOG(LogTemp, Log, TEXT("Requesting server to Move %s to Location: %s"), *Controller->GetName(), *Destination.ToString());
-	UAIBlueprintHelperLibrary::SimpleMoveToLocation(Controller, Destination);
-}
-
-bool ACherubPlayerController::ServerSetDestination_Validate(AController* Controller, const FVector& Destination)
-{
-	return true; 
-}
-
-void ACherubPlayerController::ServerSetCachedDestination_Implementation(const FVector& NewDestination)
-{
-	CachedDestination = NewDestination;
 }
 
 // Triggered every frame when the input is held down

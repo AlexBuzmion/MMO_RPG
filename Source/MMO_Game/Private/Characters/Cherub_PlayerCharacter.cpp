@@ -63,6 +63,7 @@ void ACherub_PlayerCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 	// this initializes the ability actor info for the server
 	InitAbilityActorInfo();
+	AddCharacterAbilities(); // grant abilities to player. 
 }
 
 void ACherub_PlayerCharacter::OnRep_PlayerState()

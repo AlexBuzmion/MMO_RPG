@@ -3,6 +3,7 @@
 #include "Characters/CherubCharacterBase.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/Cherub_AbilitySysComponentBase.h"
 
 
 ACherubCharacterBase::ACherubCharacterBase()
@@ -40,6 +41,16 @@ void ACherubCharacterBase::InitializeDefaultAttributes() const
 	ApplyEffectToSelf(DefaultPrimaryAttributes, 1);
 	ApplyEffectToSelf(DefaultSecondaryAttributes, 1);
 	ApplyEffectToSelf(DefaultBasicAttributes, 1);
+}
+
+void ACherubCharacterBase::AddCharacterAbilities() const
+{
+	// UCherub_AbilitySysComponentBase* cASC = CastChecked<UCherub_AbilitySysComponentBase>(AbilitySystemComponent);
+	if (!HasAuthority()) return;
+	if (UCherub_AbilitySysComponentBase* cASC = Cast<UCherub_AbilitySysComponentBase>(GetAbilitySystemComponent()))
+	{
+		cASC->AddCharacterAbilities(StartupAbilities); 
+	}
 }
 
 
