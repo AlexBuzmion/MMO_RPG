@@ -15,7 +15,7 @@ const UInputAction* UCherubInputConfig::FindAbilityInputActionForTag(const FGame
 	}
 	if (bLogNotFound)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Cant find Ability Input Action for Input Tag %s, on InputConfig %s"), *InputTag.ToString(), *GetNameSafe(this));
+		UE_LOG(LogTemp, Error, TEXT("Cant find Ability Input Action for Input Tag [%s], on InputConfig [%s]"), *InputTag.ToString(), *GetNameSafe(this));
 	}
 	return nullptr; 
 }

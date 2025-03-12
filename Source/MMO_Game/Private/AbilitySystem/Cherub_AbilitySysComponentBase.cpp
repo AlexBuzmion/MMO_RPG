@@ -24,7 +24,7 @@ void UCherub_AbilitySysComponentBase::AddCharacterAbilities(
 		{
 			// get the ability's dynamic tags and add the input tag of the gameplay ability set to the specific ability
 			// dynamic ability tags can be added and removed at run time 
-			abilitySpec.DynamicAbilityTags.AddTag(cGA->StartupInputTag);
+			abilitySpec.GetDynamicSpecSourceTags().AddTag(cGA->StartupInputTag);
 			// give the ability to the character
 			GiveAbility(abilitySpec);
 		}
@@ -36,7 +36,7 @@ void UCherub_AbilitySysComponentBase::AbilityInputTagHeld(const FGameplayTag& In
 	if (!InputTag.IsValid()) return;
 	for (auto& abilitySpec : GetActivatableAbilities())
 	{
-		if ( abilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
+		if ( abilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
 		{
 			if (!abilitySpec.IsActive())
 			{
@@ -52,7 +52,7 @@ void UCherub_AbilitySysComponentBase::AbilityInputTagReleased(const FGameplayTag
 	if (!InputTag.IsValid()) return;
 	for (auto& abilitySpec : GetActivatableAbilities())
 	{
-		if ( abilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
+		if ( abilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
 		{
 			AbilitySpecInputReleased(abilitySpec);
 		}

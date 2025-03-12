@@ -18,6 +18,8 @@ public class MMO_Game : ModuleRules
 			"Niagara", 
 			"EnhancedInput", 
 			"GameplayAbilities", 
+			"GameplayTags", 
+			"GameplayTasks",
 			"DedicatedServers",  
 			"UMG",
 			
@@ -25,8 +27,6 @@ public class MMO_Game : ModuleRules
         
         PrivateDependencyModuleNames.AddRange( new string[]
         {
-	        "GameplayTags", 
-	        "GameplayTasks",
 	        "NavigationSystem",
         });
     }

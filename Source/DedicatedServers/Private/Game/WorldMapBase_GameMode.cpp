@@ -2,17 +2,12 @@
 
 #include "Game/WorldMapBase_GameMode.h"
 
-#include "EngineUtils.h"
-#include "GameInstanceBase.h"
 #include "GameLiftServerSDK.h"
 #include "GameLiftServerSDKModels.h"
 #include "DedicatedServers/DedicatedServers.h"
-#include "Engine/PlayerStartPIE.h"
 #include "Game/DS_AWS_GI_Subsystem.h"
 #include "Kismet/GameplayStatics.h"
-#include "Player/DSLocalPlayerSubSystem.h"
 #include "Player/DS_PlayerController.h"
-#include "UI/GameSessions/GameSessionsManager.h"
 
 AWorldMapBase_GameMode::AWorldMapBase_GameMode()
 {

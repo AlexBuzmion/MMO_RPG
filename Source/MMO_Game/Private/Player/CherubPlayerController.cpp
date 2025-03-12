@@ -135,7 +135,7 @@ void ACherubPlayerController::SetupInputComponent()
 
 void ACherubPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	if (InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMouse))
+	if (InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMB))
 	{
 		// bTargetting = ThisActor ? true : false;
 		bAutoRunning = false;
@@ -145,7 +145,7 @@ void ACherubPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 void ACherubPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	// check if we should activate ability
-	if (!InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMouse))
+	if (!InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMB))
 	{
 		if (GetCASC())
 		{
@@ -189,7 +189,7 @@ void ACherubPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 void ACherubPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
 	// check if we should activate ability
-	if (!InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMouse))
+	if (!InputTag.MatchesTagExact(FCherubGameplayTags::Get().InputTag_LeftMB))
 	{
 		if (GetCASC())
 		{

@@ -30,8 +30,8 @@ public:
 	FGameplayTag Attribute_Secondary_CriticalResistance;
 	FGameplayTag Attribute_Secondary_BlockChance;
 
-	FGameplayTag InputTag_LeftMouse;
-	FGameplayTag InputTag_RightMouse;
+	FGameplayTag InputTag_LeftMB;
+	FGameplayTag InputTag_RightMB;
 	FGameplayTag InputTag_1; 
 	FGameplayTag InputTag_2; 
 	FGameplayTag InputTag_3; 

@@ -7,6 +7,32 @@ FCherubGameplayTags FCherubGameplayTags::GameplayTags;
 
 void FCherubGameplayTags::InitializeNativeGameplayTags()
 {
+	//! Input Tags
+	GameplayTags.InputTag_LeftMB = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.LeftMouse"),
+		FString("Left mouse click")
+	);
+	GameplayTags.InputTag_RightMB = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.RightMouse"),
+		FString("Right mouse click")
+	);
+	GameplayTags.InputTag_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.1"),
+		FString("Key 1 press")
+	);
+	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.2"),
+		FString("Key 2 press")
+		);
+	GameplayTags.InputTag_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.3"),
+		FString("Key 3 press")
+		);
+	GameplayTags.InputTag_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.4"),
+		FString("Key 4 press")
+	);
+	
 	//! Primary Attributes
 	GameplayTags.Attribute_Primary_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Primary.Attack"),
@@ -69,32 +95,6 @@ void FCherubGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Attribute_Secondary_Agility = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Secondary.Agility"),
 		FString("raises movement/attack speed and dodge rate")
-	);
-
-	//! Input Tags
-	GameplayTags.InputTag_LeftMouse = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("InputTag.LeftMouse"),
-		FString("")
-	);
-	GameplayTags.InputTag_RightMouse = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("InputTag.RightMouse"),
-		FString("")
-	);
-	GameplayTags.InputTag_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("InputTag.1"),
-		FString("")
-	);
-	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("InputTag.2"),
-		FString("")
-		);
-	GameplayTags.InputTag_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("InputTag.3"),
-		FString("")
-		);
-	GameplayTags.InputTag_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("InputTag.4"),
-		FString("")
 	);
 	
 }
